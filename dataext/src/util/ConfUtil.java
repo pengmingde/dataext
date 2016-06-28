@@ -21,10 +21,16 @@ public class ConfUtil {
    private Map<String,String> keyMap;
    
    static Logger logger = Logger.getLogger(ConfUtil.class.getName());
-	public static int YEARLONG=8;   //20160120
-	public static int YEARSHORT=6;  //160120
-	public static String YEARPREFIX="20";    //意味着程序只能用到2019年底，有空改写下
+	
 	public static String CONFFILE;
+	private Map<String, String> map;
+	private Map<String, String> tabMap;
+
+	
+
+
+	private static ConfUtil configUtil = null;
+	
 	private ConfUtil(String filename) {
 		Properties properties = new Properties();
 		map = new HashMap<String, String>();
@@ -50,9 +56,7 @@ public class ConfUtil {
 
 	}
 
-	private Map<String, String> map;
-
-	private static ConfUtil configUtil = null;
+	
 
 	public synchronized static ConfUtil getInstance() {
 		if (configUtil == null) {
@@ -65,6 +69,22 @@ public class ConfUtil {
 		return map.get(key);
 	}
 	
+	
+	public void put(String key,String val){
+		 map.put(key, val);
+	}
+
+
+
+	public Map<String, String> getTabMap() {
+		return tabMap;
+	}
+
+
+
+	public void setTabMap(Map<String, String> tabMap) {
+		this.tabMap = tabMap;
+	}
 	
 	
    /** @pdOid 97b34c1b-cadd-4e49-a590-6035d0c5a660 */

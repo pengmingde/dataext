@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import util.ConfUtil;
+import util.ValidateUtil;
 
 
 
@@ -20,6 +21,7 @@ public class Dataext {
 
 	ConfUtil.CONFFILE=curPath+"conf.prop";
 	ConfUtil configUtil = ConfUtil.getInstance();
-	logger.debug(configUtil);
+//	logger.debug(configUtil);
+	ValidateUtil.validate(configUtil);
 	}
 }
