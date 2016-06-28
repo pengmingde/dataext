@@ -2,15 +2,17 @@ package util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
-import main.Dataext;
 
 import org.apache.log4j.Logger;
 
@@ -22,27 +24,112 @@ public class ValidateUtil {
 		if(!checkParams(cu)){
 			logger.error("Fail:params not configure correct,exit!");
 			System.exit(-1);
+		}else{
+			logger.info("check params passed!");
 		}
 		
 		if(!checkLogin(cu)){
 			logger.error("Fail:can't login to database,exit!");
 			System.exit(-1);
+		}else{
+			logger.info("check dblogin passed!");
 		}
 		
 		if(!checkTabColFormat(cu)){
 //			logger.error("Fail:table or column not exist,exit!");
 			System.exit(-1);
+		}else{
+			logger.info("check table&column format passed!");
 		}
+		
+		
+		
+		List<String> schemas=getSchemsByCu(cu);
+		if(schemas.size()==0){
+			logger.error("schema can't been empty,exit!");
+			System.exit(-1);
+		}else{
+			logger.info("check schema available passed!");
+		}
+		
+		cu.setSchemas(schemas);
 		
 		if(!checkTabColExist(cu)){
 			logger.error("Fail:table or column not exist,exit!");
 			System.exit(-1);
+		}else{
+			logger.info("check table&column available passed!");
 		}
 	}
 	
+	private static List<String> getSchemsByCu(ConfUtil cu){
+		Connection conn=null;
+		Statement stat=null;
+		ResultSet rs=null;
+		int entcnt=0;
+		List<String> schemas = new ArrayList<String>();
+		String sql;
+		try {
+			conn = DriverManager.getConnection(cu.getVal("SOURCEDBURL"),cu.getVal("SOURCEOGGUSER"), cu.getVal("SOURCEOGGPASS"));
+			stat=conn.createStatement();
+			
+			if("Y".equals(cu.getVal("ISALL"))){
+				sql="select 'ZT_'||entcode entcode from weipos.p_entinfo where isprodent=1";
+				logger.debug(sql);
+				rs=stat.executeQuery(sql);
+				while(rs.next()){
+					String schema=rs.getString("entcode");
+					schemas.add(schema);
+				}
+				return schemas;
+			}else if("N".equals(cu.getVal("ISALL"))&&cu.getVal("SCHEMAS")!=null){
+				String schemaArray[] = cu.getVal("SCHEMAS").split(",");
+				String schsContByComma="";
+				for(String sch:schemaArray){
+					schsContByComma+=",'"+sch.toUpperCase().replace("ZT_", "")+"'";
+				}
+				schsContByComma=schsContByComma.substring(1);
+				sql="select count(*) entcnt from weipos.p_entinfo where isprodent=1 and entcode in ("+schsContByComma+")";
+				logger.debug(sql);
+				rs=stat.executeQuery(sql);
+				if(rs.next()){
+					entcnt=rs.getInt("entcnt");
+				}
+				if(entcnt!=schemaArray.length){
+					logger.error("parameter SCHEMAS wrong,some schemas not exist in weipos.entinfo,exit!");
+					System.exit(-1);
+				}
+				schemas.addAll(Arrays.asList(schemaArray));
+			}
+			
+			
+			
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			logger.error(LogUtil.getStackTrace(e1));
+			return schemas;
+		}finally{
+			
+				try {
+					if(rs!=null)
+						rs.close();
+					if(stat!=null)
+						stat.close();
+					if(conn!=null)
+						conn.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+		}
+		
+		return schemas;
+	}
 	private static boolean checkTabColExist(ConfUtil cu) {
 		Connection conn=null;
 		Statement stat=null;
+		
 		try {
 			conn = DriverManager.getConnection(cu.getVal("SOURCEDBURL"),cu.getVal("SOURCEOGGUSER"), cu.getVal("SOURCEOGGPASS"));
 		} catch (SQLException e1) {
@@ -64,10 +151,12 @@ public class ValidateUtil {
 				String tabname = entry.getKey();
 				String columns = entry.getValue(); 
 				logger.debug("tabname="+tabname+",columns="+columns);
-				String sql="select "+columns+" from "+tabname+" where rownum=1";
-				logger.debug("verify sql:"+sql);
-				stat=conn.createStatement();
-				stat.execute(sql);
+				for(String sch:cu.getSchemas()){
+					String sql="select "+columns+" from "+sch+"."+tabname+" where rownum=1";
+					logger.debug("verify sql:"+sql);
+					stat=conn.createStatement();
+					stat.execute(sql);
+				}
 			}
 			
 		} catch (SQLException e) {
@@ -172,6 +261,7 @@ public class ValidateUtil {
 //				System.exit(-1);
 				 return false;
 			}
+			
 			return true;
 	   }
 	   /** @pdOid f4d1c7d3-63af-4c25-985c-9b0a7b7f07d8 */

@@ -25,8 +25,13 @@ public class ConfUtil {
 	public static String CONFFILE;
 	private Map<String, String> map;
 	private Map<String, String> tabMap;
+	private List<String> schemas;
 
 	
+
+
+	
+
 
 
 	private static ConfUtil configUtil = null;
@@ -84,6 +89,16 @@ public class ConfUtil {
 
 	public void setTabMap(Map<String, String> tabMap) {
 		this.tabMap = tabMap;
+	}
+	
+	public List<String> getSchemas() {
+		return schemas;
+	}
+
+
+
+	public void setSchemas(List<String> schemas) {
+		this.schemas = schemas;
 	}
 	
 	
