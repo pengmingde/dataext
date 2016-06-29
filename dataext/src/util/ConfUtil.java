@@ -4,11 +4,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
 import org.apache.log4j.Logger;
+
+import bean.Table;
 
 
 /** 配置工具类
@@ -27,10 +30,75 @@ public class ConfUtil {
 	private Map<String, String> tabMap;
 	private List<String> schemas;
 
+	private Connection connSourceDB;
+	private Connection connSourceOGG;
 	
+	private Connection connTargetDB;
+	private Connection connTargetOGG;
+	private List<Table> tables;
 
 
 	
+
+
+
+	public List<Table> getTables() {
+		return tables;
+	}
+
+
+
+	public void setTables(List<Table> tables) {
+		this.tables = tables;
+	}
+
+
+
+	public Connection getConnSourceDB() {
+		return connSourceDB;
+	}
+
+
+
+	public void setConnSourceDB(Connection connSourceDB) {
+		this.connSourceDB = connSourceDB;
+	}
+
+
+
+	public Connection getConnSourceOGG() {
+		return connSourceOGG;
+	}
+
+
+
+	public void setConnSourceOGG(Connection connSourceOGG) {
+		this.connSourceOGG = connSourceOGG;
+	}
+
+
+
+	public Connection getConnTargetDB() {
+		return connTargetDB;
+	}
+
+
+
+	public void setConnTargetDB(Connection connTargetDB) {
+		this.connTargetDB = connTargetDB;
+	}
+
+
+
+	public Connection getConnTargetOGG() {
+		return connTargetOGG;
+	}
+
+
+
+	public void setConnTargetOGG(Connection connTargetOGG) {
+		this.connTargetOGG = connTargetOGG;
+	}
 
 
 
@@ -99,6 +167,22 @@ public class ConfUtil {
 
 	public void setSchemas(List<String> schemas) {
 		this.schemas = schemas;
+	}
+
+
+
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		super.finalize();
+		if(connSourceDB!=null)
+			connSourceDB.close();
+		if(connSourceOGG!=null)
+			connSourceOGG.close();
+		if(connTargetDB!=null)
+			connTargetDB.close();
+		if(connTargetOGG!=null)
+			connTargetOGG.close();
 	}
 	
 	
