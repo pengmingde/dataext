@@ -12,17 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-
-
-
-
-
 import java.util.Random;
 import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
-
 import bean.Column;
 import bean.Table;
 import config.Config;
@@ -85,7 +77,12 @@ public class ValidateUtil {
 		}
 
 //		7、检查Target端是否有对应表，如果没有的话，需要创建
-		checkTabColExistInTarget(cu);
+		if(!checkTabColExistInTarget(cu)){
+			logger.error("Fail:checkTabColExistInTarget,exit!");
+			System.exit(-1);
+		}else{
+			logger.info("checkTabColExistInTarget passed!");
+		}
 		
 	}
 	
@@ -151,6 +148,10 @@ public class ValidateUtil {
 		return tables;
 	}
 	
+//	private static boolean setPKForTable(ConfUtil cu,Table table){
+//		
+//	}
+	
 	private static List<String> getSchemsByCu(ConfUtil cu){
 		Statement stat=null;
 		ResultSet rs=null;
@@ -206,10 +207,11 @@ public class ValidateUtil {
 //	检查目标schema下是否有同名的表：
 //	1）如果没有则创建表
 //	2）如果有则检查列是否一致，如果列不一致，则备份走，并重建一个符合要求的表
-	private static void checkTabColExistInTarget(ConfUtil cu) {
+	private static boolean checkTabColExistInTarget(ConfUtil cu) {
 		Statement stat=null;
 		ResultSet rs=null;
 		int tabcnt=0;
+		boolean succ=true;
 		String sql="";
 		
 		try {
@@ -233,7 +235,11 @@ public class ValidateUtil {
 				if(tabcnt==0){
 					logger.info("table "+tabname+" not exist on target,create it now！ ");
 //					sql="select column_name from dba_tab_cols where table_name=''";
-					createTabOnTarget(cu,tab);
+					if(createTabOnTarget(cu,tab)){
+						logger.info("table "+tabname+" create on target success！ ");
+					}else{
+						succ=false;
+					}
 				}else{
 //					检查表、列是否匹配，如果匹配则OK，如果不匹配，则备份并重建表
 //					检查表、列是否匹配
@@ -260,11 +266,14 @@ public class ValidateUtil {
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			succ=false;
 			logger.error(LogUtil.getStackTrace(e));
 		}finally{
 			ConnUtil.freeRs(rs);
 			ConnUtil.freeStat(stat);
 		}
+		
+		return succ;
 	}
 	
 	private static boolean deleteTargetDataBySchema(ConfUtil cu,Table tab){
@@ -397,7 +406,6 @@ public class ValidateUtil {
 			}
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			logger.error(LogUtil.getStackTrace(e));
 			return false;
 		}finally{

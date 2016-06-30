@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import util.ConfUtil;
+import util.ParamFileUtil;
 import util.ValidateUtil;
 
 
@@ -20,8 +21,12 @@ public class Dataext {
 	logger.debug("curPath:" + curPath);
 
 	ConfUtil.CONFFILE=curPath+"conf.prop";
-	ConfUtil configUtil = ConfUtil.getInstance();
+	ConfUtil cu = ConfUtil.getInstance();
 //	logger.debug(configUtil);
-	ValidateUtil.validate(configUtil);
+	ValidateUtil.validate(cu);
+	String extname="ext_bill";
+	String parContent=ParamFileUtil.generateExtContent(cu,extname);
+	ParamFileUtil.generateExtFILE(cu, extname, parContent);
+//	logger.debug(ParamFileUtil.generateExtContent(cu,extname));
 	}
 }

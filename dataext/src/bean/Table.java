@@ -36,6 +36,11 @@ public class Table {
 		this.columns = columns;
 	}
 	
+	public String getKeyCol(){
+//		String str=columnstr.substring(0,columnstr.indexOf(","));
+		return (columnstr==null||"".equals(columnstr))?"":columnstr.substring(0,columnstr.indexOf(","));
+	}
+	
 	public String toString() {
 		// TODO Auto-generated method stub
 		String res="";
