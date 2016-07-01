@@ -27,4 +27,9 @@ public class Config {
 	public static String TARGETOGGHOME;
 	
 	public static String ALLCOLUMN="ALLCOLUMN";
+	public static String DIRPRM="dirprm";
+	public static String DEFSUFFIX=".def";
+	public static String DIRDEF="dirdef";
+	public static String PARFILESUFFIX=".prm";
+	public static String DEFPARFILESUFFIX=".par";
 }

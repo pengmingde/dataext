@@ -526,6 +526,11 @@ public class ValidateUtil {
 			if(!checkParamsMust(cu,"TABLES"))  return false;
 			if(!checkParamsMust(cu,"SOURCEOGGHOME"))  return false;
 			if(!checkParamsMust(cu,"TARGETOGGHOME"))  return false;
+			if(!checkParamsMust(cu,"EXTNAME"))  return false;
+			
+//			如果SSH端口未设置，则设置为默认端口22
+			if(!checkParamsOptional(cu,"SOURCESSHPORT","22"))  return false;
+			if(!checkParamsOptional(cu,"TARGETSSHPORT","22"))  return false;
 			
 //			if(!checkParamsDBValueFormat(cu,"SOURCEDB"))  return false;
 //			if(!checkParamsDBValueFormat(cu,"TARGETDB"))  return false;
@@ -538,6 +543,15 @@ public class ValidateUtil {
 				logger.error("Fail:param "+key+" is need!");
 //				System.exit(-1);
 				 return false;
+			}
+	      return true;
+	   }
+	   
+	   private static boolean checkParamsOptional(ConfUtil cu,String key,String value) {
+		   	if(cu.getVal(key)==null||"".equals(cu.getVal(key))){
+				logger.error("param "+key+" not set,so it been set to default value:"+value+"!");
+				cu.put(key, value);
+//				System.exit(-1);
 			}
 	      return true;
 	   }
